@@ -1,2 +1,185 @@
-# Parallel-Performance-Analysis-on-Linux-HPC
+# Parallel Performance Analysis on Linux HPC
+
 A hands-on scaling study analyzing parallel performance of a 2D grid smoothing operation using MPI on a Linux environment. The project covers the full HPC workflow — from environment setup, MPI programming and performance visualization — with both strong and weak scaling analyses.
+
+---
+
+## Motivation
+
+In computationally intensive domains like oil and gas subsurface simulation, choosing the right processor count for a given problem size directly impacts both turnaround time and infrastructure cost. This project builds a minimal but complete parallel computing pipeline to explore that tradeoff: how well does performance actually scale when you throw more processors at a problem, and where do diminishing returns set in?
+
+---
+
+## What This Project Does
+
+The core program performs iterative 2D grid smoothing (a stencil operation) where each cell is averaged with its four neighbors over multiple timesteps (iterations). The grid is domain-decomposed along the Y-axis across MPI ranks (processors), with ghost-row boundary exchanges between neighboring processors at each iteration.
+
+Two scaling studies are run against this program:
+
+**Strong scaling** — fixed problem size (e.g. 50×500 grid, 50 iterations), increasing processor count from 1 → 2 → 4. Measures how much faster the same workload completes with more resources.
+
+**Weak scaling** — problem size grows proportionally with processor count so each rank always handles the same local workload (e.g. 500 rows per processor). Measures whether communication overhead stays manageable as the system scales.
+
+---
+
+## Skills Demonstrated
+
+| Domain | Skills |
+|---|---|
+| **Linux administration** | File system navigation, permissions (`chmod`), process management (`top`, `ps`, `kill`), system profiling (`nproc`, `lscpu`, `free`, `df`) |
+| **Bash scripting** | Automated job submission scripts with parameterized inputs, result collection and CSV parsing with `awk`/`grep`, executable script workflows |
+| **MPI parallel programming** | Domain decomposition, point-to-point communication (`Send`/`Recv`), ghost-row boundary exchanges, barrier synchronization, rank-based I/O |
+| **Performance analysis** | Speedup and parallel efficiency calculation, strong vs. weak scaling interpretation, identification of communication overhead bottlenecks |
+| **Data visualization** | Matplotlib charts for speedup curves, efficiency bar plots, ideal-vs-actual comparisons |
+| **Software engineering** | Clean project structure, Git version control, reproducible workflows with input parameter files |
+
+---
+
+## Project Structure
+
+```
+hpc-scaling-project/
+├── README.md
+├── src/
+│   ├── test_mpi.py               # MPI installation verification
+│   ├── parallel_smooth.py        # Core parallel stencil program
+│   └── plot_results.py           # Performance visualization
+├── scripts/
+│   ├── run_strong_scaling.sh     # Automates strong scaling runs
+│   ├── run_weak_scaling.sh       # Automates weak scaling runs
+│   ├── collect_strong_results.sh # Parses raw output → CSV
+│   └── collect_weak_results.sh   # Parses raw output → CSV
+├── results/
+│   ├── strong_results.txt        # Raw timing output
+│   ├── weak_results.txt          # Raw timing output
+│   ├── strong_summary.csv        # Parsed summary data
+│   └── weak_summary.csv          # Parsed summary data
+├── plots/
+    ├── strong_scaling.png        # Speedup & efficiency charts
+    └── weak_scaling.png          # Weak scaling charts
+
+```
+
+---
+
+## How It Works
+
+### Domain Decomposition
+
+The 2D grid (nx columns × ny rows) is split across processors along the Y-axis. Each processor owns `ny / N` rows plus two ghost rows for boundary exchange with its neighbors:
+
+```
+Processor 0:  rows 1–500      ↔ boundary exchange with Proc 1
+Processor 1:  rows 501–1,000  ↔ boundary exchange with Proc 0 & 2
+Processor 2:  rows 1,001–1,500  ↔ boundary exchange with Proc 1 & 3
+Processor 3:  rows 1,501–2,000 ↔ boundary exchange with Proc 2
+```
+
+At each timestep, neighboring ranks exchange their boundary rows via `MPI.Send` / `MPI.Recv`, then each rank performs the local smoothing computation independently.
+
+### Smoothing Operation
+
+Each interior grid point is replaced by the average of its four direct neighbors (north, south, east, west) — a classic 5-point stencil pattern used.
+
+---
+
+## Results
+
+### Strong Scaling
+
+Fixed grid of 50×500 with 50 timesteps, varying processor count:
+
+| Processors | Time (s) | Speedup | Efficiency |
+|---|---|---|---|
+| 1 | 0.422 | 1.00× | 1.00 |
+| 2 | 0.230 | 1.83× | 0.92 |
+| 4 | 0.122 | 3.46× | 0.86 |
+
+Near-linear speedup with 91% parallel efficiency at 4 processors, indicating low communication overhead relative to computation at this problem size.
+
+### Weak Scaling
+
+Each processor handles 500 rows; total problem grows with processor count:
+
+| Processors | Grid Size (NY) | Work/Proc | Time (s) | Efficiency |
+|---|---|---|---|---|
+| 1 | 500   | 500 rows | 0.432  | 1.00 |
+| 2 | 1,000 | 500 rows | 0.445 | ~0.97 |
+| 4 | 2,000 | 500 rows | 0.476 |~0.91 |
+
+Efficiency remains high, confirming that the boundary exchange overhead scales sub-linearly (when processors count go from 1 to 4, the overhead cost does not quadruple) with processor count for this stencil pattern.
+
+### Key Observations
+
+- **Strong scaling** shows diminishing returns as the communication-to-computation ratio increases with more processors on a fixed problem.
+- **Weak scaling** efficiency stays near-ideal, which is expected for stencil operations where each rank only communicates with two immediate neighbors regardless of total rank count.
+- The practical implication: for this problem class, scaling to 4 processors is highly efficient. Beyond that, a larger problem size would be needed to maintain favorable computation-to-communication ratios.
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Linux environment (Ubuntu)
+- Python 3.x with `numpy`, `matplotlib`
+- MPI runtime (MPICH) with `mpi4py`
+
+### Installation
+
+```bash
+# Install MPI
+sudo apt update && sudo apt install mpich
+
+# Install Python packages
+pip3 install numpy matplotlib mpi4py -break-system-packages
+
+# Verify
+mpiexec --version
+python3 -c "from mpi4py import MPI; print('mpi4py OK')"
+```
+
+### Run the Studies
+
+```bash
+# Strong scaling study
+bash scripts/run_strong_scaling.sh
+
+# Weak scaling study
+bash scripts/run_weak_scaling.sh
+
+# Parse results to CSV
+bash scripts/collect_strong_results.sh
+bash scripts/collect_weak_results.sh
+
+# Generate performance plots
+python3 src/plot_results.py
+```
+
+---
+
+## Analysis Questions Addressed
+
+The written analysis in `analysis_report.md` covers:
+
+1. Does speedup increase linearly with processors? Where and why does it deviate?
+2. At what processor count does efficiency degrade significantly?
+3. What are the sources of overhead — communication latency, synchronization barriers, or load imbalance?
+4. How do strong and weak scaling results complement each other in characterizing parallel performance?
+5. What is the recommended processor count for this problem size, and how does that decision translate to real HPC cost optimization?
+
+---
+
+## Technologies
+
+- **Language**: Python 3 (NumPy, matplotlib, mpi4py)
+- **Parallel framework**: MPI via MPICH
+- **Scripting**: Bash
+- **Version control**: Git
+- **Platform**: Ubuntu Linux
+
+---
+
+## Author
+
+Nursyazwani Sani — Production Geoscientist with 10 years in the oil and gas industry, bridging geoscience and data-driven digital platforms. This project demonstrates foundational HPC skills relevant to large-scale simulation, reservoir modeling, and subsurface data processing.
