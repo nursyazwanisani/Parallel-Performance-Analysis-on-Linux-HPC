@@ -1,11 +1,5 @@
 # Parallel Performance Analysis — Summary Report
 
-**Project:** 2D Grid Smoothing with MPI on Linux HPC  
-**Author:** Nursyazwani Sani  
-**Platform:** Ubuntu Server (ARM64), 4 cores, 4 GB RAM | Python 3, mpi4py, MPICH
-
----
-
 ## Objective
 
 Measure how much faster a 2D grid smoothing program runs when we split the work across multiple processors using MPI.
