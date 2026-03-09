@@ -158,19 +158,6 @@ bash scripts/collect_weak_results.sh
 # Generate performance plots
 python3 src/plot_results.py
 ```
-
----
-
-## Analysis Questions Addressed
-
-The written analysis in `analysis_report.md` covers:
-
-1. Does speedup increase linearly with processors? Where and why does it deviate?
-2. At what processor count does efficiency degrade significantly?
-3. What are the sources of overhead — communication latency, synchronization barriers, or load imbalance?
-4. How do strong and weak scaling results complement each other in characterizing parallel performance?
-5. What is the recommended processor count for this problem size, and how does that decision translate to real HPC cost optimization?
-
 ---
 
 ## Technologies
@@ -180,9 +167,3 @@ The written analysis in `analysis_report.md` covers:
 - **Scripting**: Bash
 - **Version control**: Git
 - **Platform**: Ubuntu Linux
-
----
-
-## Author
-
-Nursyazwani Sani — Production Geoscientist with 10 years in the oil and gas industry, bridging geoscience and data-driven digital platforms. This project demonstrates foundational HPC skills relevant to large-scale simulation, reservoir modeling, and subsurface data processing.
