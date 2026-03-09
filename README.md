@@ -25,19 +25,6 @@ Two scaling studies are run against this program:
 
 ---
 
-## Skills Demonstrated
-
-| Domain | Skills |
-|---|---|
-| **Linux administration** | File system navigation, permissions (`chmod`), process management (`top`, `ps`, `kill`), system profiling (`nproc`, `lscpu`, `free`, `df`) |
-| **Bash scripting** | Automated job submission scripts with parameterized inputs, result collection and CSV parsing with `awk`/`grep`, executable script workflows |
-| **MPI parallel programming** | Domain decomposition, point-to-point communication (`Send`/`Recv`), ghost-row boundary exchanges, barrier synchronization, rank-based I/O |
-| **Performance analysis** | Speedup and parallel efficiency calculation, strong vs. weak scaling interpretation, identification of communication overhead bottlenecks |
-| **Data visualization** | Matplotlib charts for speedup curves, efficiency bar plots, ideal-vs-actual comparisons |
-| **Software engineering** | Clean project structure, Git version control, reproducible workflows with input parameter files |
-
----
-
 ## Project Structure
 
 ```
