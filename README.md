@@ -9,7 +9,7 @@ A hands-on scaling study analyzing parallel performance of a 2D grid smoothing o
 
 ## Motivation
 
-In computationally intensive domains like oil and gas subsurface simulation, choosing the right processor count for a given problem size directly impacts both turnaround time and infrastructure cost. This project builds a minimal but complete parallel computing pipeline to explore that tradeoff: how well does performance actually scale when you throw more processors at a problem, and where do diminishing returns set in?
+This project aims to learn Linux and HPC fundamentals, and understand how parallel programs scale. Through hands-on experiments with strong and weak scaling, I want to explore how performance changes when adding more processors to a problem. More importantly, I want to understand how to optimize computing resources and reduce costs by matching the right number of processors to the problem size. When we understand how HPC works properly, we can avoid wasting resources and money on unnecessary computing power.
 
 ---
 
